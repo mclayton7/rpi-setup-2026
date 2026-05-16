@@ -1,0 +1,8 @@
+---
+- name: Create colored bash prompt configuration
+  copy:
+    src: bash_prompt.sh
+    dest: /etc/profile.d/colored_prompt.sh
+    owner: root
+    group: root
+    mode: '0644'

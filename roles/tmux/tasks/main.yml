@@ -1,0 +1,14 @@
+---
+- name: Install tmux
+  apt:
+    name: tmux
+    state: present
+    update_cache: yes
+
+- name: Ensure .tmux.conf exists in home directory
+  copy:
+    src: .tmux.conf
+    dest: "{{ ansible_user_dir }}/.tmux.conf"
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_id }}"
+    mode: '0644'

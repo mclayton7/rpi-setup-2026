@@ -1,0 +1,15 @@
+---
+- name: Configure Raspberry Pis
+  hosts: raspberry_pis
+  gather_facts: yes
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+
+  roles:
+    - tmux
+    - bash-prompt
+
+  post_tasks:
+    - name: Display success message
+      debug:
+        msg: "Successfully configured {{ inventory_hostname }} with tmux and colored bash prompt"
