@@ -13,6 +13,7 @@
   set_fact:
     lazydocker_arch: "{{ {'x86_64': 'x86_64', 'aarch64': 'arm64'}[ansible_architecture] }}"
     dtop_arch: "{{ {'x86_64': 'x86_64-unknown-linux-gnu', 'aarch64': 'aarch64-unknown-linux-gnu'}[ansible_architecture] }}"
+    k9s_arch: "{{ {'x86_64': 'amd64', 'aarch64': 'arm64'}[ansible_architecture] }}"
 
 # --- lazydocker -----------------------------------------------------------
 
@@ -52,8 +53,32 @@
     dest: /usr/local/bin
     remote_src: yes
     include:
-      - dtop
+      - dtop-{{ dtop_arch }}/dtop
+    extra_opts:
+      - --strip-components=1
     owner: root
     group: root
     mode: '0755'
   when: dtop_version not in (dtop_installed.stdout | default(''))
+
+# --- k9s ------------------------------------------------------------------
+
+- name: Check installed k9s version
+  command: k9s version --short
+  register: k9s_installed
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: Install k9s {{ k9s_version }}
+  unarchive:
+    src: >-
+      https://github.com/derailed/k9s/releases/download/v{{ k9s_version }}/k9s_Linux_{{ k9s_arch }}.tar.gz
+    dest: /usr/local/bin
+    remote_src: yes
+    include:
+      - k9s
+    owner: root
+    group: root
+    mode: '0755'
+  when: k9s_version not in (k9s_installed.stdout | default(''))
