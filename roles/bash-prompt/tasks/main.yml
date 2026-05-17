@@ -6,3 +6,37 @@
     owner: root
     group: root
     mode: '0644'
+
+- name: Create quality-of-life bash configuration
+  copy:
+    src: bash_qol.sh
+    dest: /etc/profile.d/zz-bash-qol.sh
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Enable case-insensitive tab completion and readline QoL
+  blockinfile:
+    path: /etc/inputrc
+    create: yes
+    owner: root
+    group: root
+    mode: '0644'
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - readline QoL"
+    block: |
+      # Case-insensitive tab completion
+      set completion-ignore-case on
+      # Treat - and _ as interchangeable while completing
+      set completion-map-case on
+      # Show all matches on the first Tab instead of requiring a second
+      set show-all-if-ambiguous on
+      set show-all-if-unmodified on
+      # Color completion listings by file type
+      set colored-stats on
+      set colored-completion-prefix on
+      # Append a marker (/, *, @) to completed names
+      set visible-stats on
+      set mark-symlinked-directories on
+      # Up/Down search history for entries matching what's typed so far
+      "\e[A": history-search-backward
+      "\e[B": history-search-forward

@@ -12,3 +12,11 @@
     owner: "{{ ansible_user_id }}"
     group: "{{ ansible_user_id }}"
     mode: '0644'
+
+- name: Auto-start tmux on interactive login
+  copy:
+    src: tmux-autostart.sh
+    dest: /etc/profile.d/zz-tmux-autostart.sh
+    owner: root
+    group: root
+    mode: '0644'

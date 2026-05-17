@@ -8,6 +8,16 @@
       - jq          # JSON filtering for `docker inspect` output
       - ncdu        # disk-usage TUI (track /var/lib/docker growth)
       - pigz        # parallel gzip; used by docker save/load/commit
+      - vim         # text editor
     state: present
     update_cache: yes
     cache_valid_time: 3600
+
+- name: Check current default editor alternative
+  command: update-alternatives --query editor
+  register: editor_alt
+  changed_when: false
+
+- name: Make vim the system default editor
+  command: update-alternatives --set editor /usr/bin/vim.basic
+  when: "'Value: /usr/bin/vim.basic' not in editor_alt.stdout"

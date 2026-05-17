@@ -80,6 +80,9 @@ ansible-playbook playbooks/site.yml -v
   - Vi keybindings in copy mode
   - Status bar with hostname and time
   - History limit: 10,000 lines
+- **Auto-start**: Deploys `/etc/profile.d/zz-tmux-autostart.sh` so an
+  interactive login attaches to (or creates) a `main` tmux session. Guarded
+  to skip non-interactive sessions (scp/sftp, cron, Ansible).
 
 ### Bash Prompt Colors
 Deploys `/etc/profile.d/colored_prompt.sh` with:
@@ -89,6 +92,14 @@ Deploys `/etc/profile.d/colored_prompt.sh` with:
 - **Prompt Character**: White (user) or Red (root)
 - **ls command**: Color enabled automatically
 
+### Bash Quality-of-Life
+- **Readline** (`/etc/inputrc`): case-insensitive tab completion, `-`/`_`
+  treated as interchangeable, all matches shown on the first Tab, colored
+  completion listings, and Up/Down history search by prefix.
+- **Shell** (`/etc/profile.d/zz-bash-qol.sh`): larger timestamped history
+  with de-duplication, `cd` typo autocorrect, `autocd`, recursive `**`
+  globbing, and common aliases (`ll`, `la`, `..`, `grep --color`, etc.).
+
 ### Base Packages
 Installs via apt:
 - **skopeo**: container image inspection and copy tool
@@ -97,6 +108,7 @@ Installs via apt:
 - **jq**: JSON filtering for `docker inspect` output
 - **ncdu**: disk-usage TUI for tracking `/var/lib/docker` growth
 - **pigz**: parallel gzip, used automatically by `docker save`/`load`/`commit`
+- **vim**: text editor; also set as the system default (`editor` alternative), so `crontab -e`, `sudoedit`, etc. use it
 
 ### Docker
 Installs Docker Engine from the official `docker-ce` apt repository:
@@ -204,9 +216,11 @@ pi7:
 - Update Raspberry Pi: `sudo apt-get update && sudo apt-get upgrade`
 - Ensure Python3 is installed
 
-### Tmux not starting by default
-- Tmux is installed but not automatically started. To use it, run `tmux` manually
-- Or modify your shell profile to launch tmux automatically
+### Tmux starts automatically on login
+- Interactive logins attach to (or create) a `main` session via
+  `/etc/profile.d/zz-tmux-autostart.sh`.
+- To get a plain shell without tmux, detach with `Ctrl+A d`, or remove
+  that file.
 
 ## Notes
 
