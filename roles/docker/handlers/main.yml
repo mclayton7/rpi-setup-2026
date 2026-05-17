@@ -1,0 +1,7 @@
+---
+- name: Warn about docker group re-login
+  debug:
+    msg: >-
+      {{ ansible_user_id }} was added to the docker group.
+      The user must log out and back in (or run `newgrp docker`)
+      before docker can be used without sudo.

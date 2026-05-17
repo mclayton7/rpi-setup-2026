@@ -1,0 +1,33 @@
+---
+# Single-node k3s server on each host. k3s runs its own embedded containerd
+# (/run/k3s/containerd/containerd.sock), independent of the docker-ce
+# containerd installed by the `docker` role — Docker and `docker compose`
+# are unaffected. Traefik is disabled so ports 80/443 stay free.
+
+- name: Download the k3s installer
+  get_url:
+    url: https://get.k3s.io
+    dest: /usr/local/bin/k3s-install.sh
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Check installed k3s version
+  command: k3s --version
+  register: k3s_installed
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: Install k3s {{ k3s_version }} (single-node server, Traefik disabled)
+  command: /usr/local/bin/k3s-install.sh
+  environment:
+    INSTALL_K3S_VERSION: "{{ k3s_version }}"
+    INSTALL_K3S_EXEC: "server --disable traefik --write-kubeconfig-mode {{ k3s_kubeconfig_mode }}"
+  when: k3s_version not in (k3s_installed.stdout | default(''))
+
+- name: Ensure k3s service is started and enabled
+  service:
+    name: k3s
+    state: started
+    enabled: yes

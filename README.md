@@ -7,7 +7,11 @@ Automated configuration for 6 Raspberry Pis using Ansible, including tmux setup 
 - Ansible 2.9 or later installed on your control machine
 - SSH access to all Raspberry Pi hosts
 - Passwordless sudo configured on Raspberry Pis (or provide sudo password when running playbook)
-- Default OS: Raspberry Pi OS (Debian-based)
+- Target OS: Ubuntu 24.04 LTS or 26.04 LTS
+
+> The `docker` role installs from the official `docker-ce` apt repository and
+> asserts the host is Ubuntu 24.04 or newer. The other roles are
+> distribution-agnostic.
 
 ## Installation & Setup
 
@@ -85,6 +89,50 @@ Deploys `/etc/profile.d/colored_prompt.sh` with:
 - **Prompt Character**: White (user) or Red (root)
 - **ls command**: Color enabled automatically
 
+### Base Packages
+Installs via apt:
+- **skopeo**: container image inspection and copy tool
+- **htop**: interactive process viewer
+- **iproute2**: provides the `ss` socket statistics tool
+- **jq**: JSON filtering for `docker inspect` output
+- **ncdu**: disk-usage TUI for tracking `/var/lib/docker` growth
+- **pigz**: parallel gzip, used automatically by `docker save`/`load`/`commit`
+
+### Docker
+Installs Docker Engine from the official `docker-ce` apt repository:
+- Adds Docker's GPG key to `/etc/apt/keyrings/docker.asc`
+- Registers `https://download.docker.com/linux/ubuntu` for the host's
+  release codename (`ansible_distribution_release`)
+- Installs `docker-ce`, `docker-ce-cli`, `containerd.io`,
+  `docker-buildx-plugin`, and `docker-compose-plugin`
+- Enables and starts the `docker` service
+- Adds the deploy user to the `docker` group (re-login required before
+  docker works without sudo)
+
+### Container Tools
+Installs pinned GitHub release binaries into `/usr/local/bin` (not packaged
+in apt):
+- **lazydocker**: full-screen TUI for containers, images, volumes, and logs
+- **dtop**: terminal dashboard for Docker monitoring across hosts
+
+Versions are pinned in `roles/container-tools/defaults/main.yml`. The role is
+idempotent and replaces the binary only on a version change. Supports
+`x86_64` and `aarch64` hosts.
+
+### k3s
+Installs a **single-node k3s server on each host** via the official
+`get.k3s.io` installer:
+- Pinned version in `roles/k3s/defaults/main.yml`; the installer re-runs only
+  on a version change
+- Started with `--disable traefik`, so ports **80/443 stay free** for
+  `docker compose` apps
+- `--write-kubeconfig-mode 0644` so the deploy user can run `kubectl` without
+  sudo (kubeconfig is at `/etc/rancher/k3s/k3s.yaml`)
+- Enables and starts the `k3s` systemd service
+
+k3s runs its own embedded containerd, independent of Docker — `docker` and
+`docker compose` are unaffected. Each host is its own standalone cluster.
+
 ## Customization
 
 ### Modify tmux Configuration
@@ -118,11 +166,29 @@ pi7:
 │   │   │   └── main.yml       # Install & configure tmux
 │   │   └── files/
 │   │       └── .tmux.conf     # tmux configuration
-│   └── bash-prompt/
+│   ├── bash-prompt/
+│   │   ├── tasks/
+│   │   │   └── main.yml       # Configure bash prompt
+│   │   └── files/
+│   │       └── bash_prompt.sh # Prompt color script
+│   ├── packages/
+│   │   └── tasks/
+│   │       └── main.yml       # Install skopeo, htop, iproute2, jq, ncdu, pigz
+│   ├── docker/
+│   │   ├── tasks/
+│   │   │   └── main.yml       # Install Docker from docker-ce repo
+│   │   └── handlers/
+│   │       └── main.yml       # docker group re-login notice
+│   ├── container-tools/
+│   │   ├── tasks/
+│   │   │   └── main.yml       # Install lazydocker & dtop binaries
+│   │   └── defaults/
+│   │       └── main.yml       # Pinned lazydocker/dtop versions
+│   └── k3s/
 │       ├── tasks/
-│       │   └── main.yml       # Configure bash prompt
-│       └── files/
-│           └── bash_prompt.sh # Prompt color script
+│       │   └── main.yml       # Install single-node k3s server
+│       └── defaults/
+│           └── main.yml       # Pinned k3s version, kubeconfig mode
 └── playbooks/
     └── site.yml               # Main playbook
 

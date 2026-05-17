@@ -1,0 +1,9 @@
+---
+# Pinned k3s release (stable channel). Bump to upgrade; the role is
+# idempotent and re-runs the installer only on a version change.
+k3s_version: "v1.35.4+k3s1"
+
+# kubeconfig file mode. 0644 lets the deploy user run kubectl without sudo,
+# at the cost of the cluster-admin credentials being world-readable on the
+# host. Tighten to 0640 (and add the user to a shared group) if that matters.
+k3s_kubeconfig_mode: "0644"

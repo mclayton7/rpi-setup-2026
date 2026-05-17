@@ -1,0 +1,5 @@
+---
+# Pinned upstream release versions (no leading "v").
+# Bump these to upgrade; the role is idempotent and will replace the binary.
+lazydocker_version: "0.25.2"
+dtop_version: "0.7.6"

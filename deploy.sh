@@ -71,9 +71,13 @@ echo ""
 # Deploy
 echo "=== Ready to Deploy ==="
 echo ""
-echo "This will apply the following to all Raspberry Pis:"
+echo "This will apply the following to all hosts:"
 echo "  1. Install tmux with default configuration"
 echo "  2. Configure colored bash prompt"
+echo "  3. Install base packages (skopeo, htop, ss/iproute2, jq, ncdu, pigz)"
+echo "  4. Install Docker from the docker-ce apt repository"
+echo "  5. Install container tools (lazydocker, dtop)"
+echo "  6. Install single-node k3s (Traefik disabled)"
 echo ""
 
 read -p "Deploy now? (y/n) " -n 1 -r

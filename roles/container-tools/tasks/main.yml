@@ -1,0 +1,59 @@
+---
+# lazydocker and dtop are not packaged in apt; install pinned GitHub
+# release binaries into /usr/local/bin.
+
+- name: Resolve release architecture names
+  assert:
+    that: ansible_architecture in ['x86_64', 'aarch64']
+    fail_msg: >-
+      container-tools supports x86_64 and aarch64 only
+      (detected {{ ansible_architecture }}).
+
+- name: Set per-tool architecture strings
+  set_fact:
+    lazydocker_arch: "{{ {'x86_64': 'x86_64', 'aarch64': 'arm64'}[ansible_architecture] }}"
+    dtop_arch: "{{ {'x86_64': 'x86_64-unknown-linux-gnu', 'aarch64': 'aarch64-unknown-linux-gnu'}[ansible_architecture] }}"
+
+# --- lazydocker -----------------------------------------------------------
+
+- name: Check installed lazydocker version
+  command: lazydocker --version
+  register: lazydocker_installed
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: Install lazydocker {{ lazydocker_version }}
+  unarchive:
+    src: >-
+      https://github.com/jesseduffield/lazydocker/releases/download/v{{ lazydocker_version }}/lazydocker_{{ lazydocker_version }}_Linux_{{ lazydocker_arch }}.tar.gz
+    dest: /usr/local/bin
+    remote_src: yes
+    include:
+      - lazydocker
+    owner: root
+    group: root
+    mode: '0755'
+  when: lazydocker_version not in (lazydocker_installed.stdout | default(''))
+
+# --- dtop -----------------------------------------------------------------
+
+- name: Check installed dtop version
+  command: dtop --version
+  register: dtop_installed
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: Install dtop {{ dtop_version }}
+  unarchive:
+    src: >-
+      https://github.com/amir20/dtop/releases/download/v{{ dtop_version }}/dtop-{{ dtop_arch }}.tar.gz
+    dest: /usr/local/bin
+    remote_src: yes
+    include:
+      - dtop
+    owner: root
+    group: root
+    mode: '0755'
+  when: dtop_version not in (dtop_installed.stdout | default(''))
