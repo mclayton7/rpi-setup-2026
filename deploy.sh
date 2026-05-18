@@ -72,12 +72,13 @@ echo ""
 echo "=== Ready to Deploy ==="
 echo ""
 echo "This will apply the following to all hosts:"
-echo "  1. Install tmux with default configuration"
-echo "  2. Configure colored bash prompt"
-echo "  3. Install base packages (skopeo, htop, ss/iproute2, jq, ncdu, pigz)"
-echo "  4. Install Docker from the docker-ce apt repository"
-echo "  5. Install container tools (lazydocker, dtop)"
-echo "  6. Install single-node k3s (Traefik disabled)"
+echo "  1. Grant passwordless sudo to the ansible user"
+echo "  2. Install tmux with default configuration"
+echo "  3. Configure colored bash prompt"
+echo "  4. Install base packages (skopeo, htop, ss/iproute2, jq, ncdu, pigz, nmap)"
+echo "  5. Install Docker from the docker-ce apt repository"
+echo "  6. Install container tools (lazydocker, dtop)"
+echo "  7. Install single-node k3s (Traefik disabled)"
 echo ""
 
 read -p "Deploy now? (y/n) " -n 1 -r
@@ -87,17 +88,11 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     exit 0
 fi
 
-# Check for sudo password
-read -p "Do your Pis require a sudo password? (y/n) " -n 1 -r
-echo ""
-
-if [[ $REPLY =~ ^[Yy]$ ]]; then
-    echo "Running playbook (will prompt for sudo password)..."
-    ansible-playbook -i "$INVENTORY" "$PLAYBOOK" -K
-else
-    echo "Running playbook..."
-    ansible-playbook -i "$INVENTORY" "$PLAYBOOK"
-fi
+# The Ubuntu cloud-init 'ubuntu' user has passwordless sudo by default, and the
+# 'sudo' role makes it explicit/idempotent, so no -K prompt is needed. If a Pi
+# has been hardened to require a sudo password, run manually with: -K
+echo "Running playbook..."
+ansible-playbook -i "$INVENTORY" "$PLAYBOOK"
 
 echo ""
 echo "=== Deployment Complete ==="

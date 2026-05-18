@@ -8,6 +8,7 @@
       - jq          # JSON filtering for `docker inspect` output
       - ncdu        # disk-usage TUI (track /var/lib/docker growth)
       - pigz        # parallel gzip; used by docker save/load/commit
+      - nmap        # network/port scanner
       - vim         # text editor
     state: present
     update_cache: yes

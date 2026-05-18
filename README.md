@@ -71,6 +71,14 @@ ansible-playbook playbooks/site.yml -v
 
 ## What Gets Configured
 
+### Passwordless Sudo
+- Drops `/etc/sudoers.d/90-<user>-nopasswd` granting the `ansible_user`
+  `NOPASSWD:ALL`, validated with `visudo -cf` before install.
+- Lets subsequent playbook runs (and the deploy script) run without the `-K`
+  prompt. Ubuntu's cloud-init `ubuntu` user already has passwordless sudo, so
+  the very first run normally needs no `-K` either; pass `-K` manually only if
+  a host has been hardened to require a sudo password.
+
 ### tmux
 - **Installation**: Installs tmux package via apt
 - **Configuration**: Deploys default `.tmux.conf` with:
@@ -108,6 +116,7 @@ Installs via apt:
 - **jq**: JSON filtering for `docker inspect` output
 - **ncdu**: disk-usage TUI for tracking `/var/lib/docker` growth
 - **pigz**: parallel gzip, used automatically by `docker save`/`load`/`commit`
+- **nmap**: network/port scanner
 - **vim**: text editor; also set as the system default (`editor` alternative), so `crontab -e`, `sudoedit`, etc. use it
 
 ### Docker
@@ -173,6 +182,9 @@ pi7:
 ├── inventory/
 │   └── hosts.yml              # Inventory file
 ├── roles/
+│   ├── sudo/
+│   │   └── tasks/
+│   │       └── main.yml       # Grant passwordless sudo to the ansible user
 │   ├── tmux/
 │   │   ├── tasks/
 │   │   │   └── main.yml       # Install & configure tmux
@@ -185,7 +197,7 @@ pi7:
 │   │       └── bash_prompt.sh # Prompt color script
 │   ├── packages/
 │   │   └── tasks/
-│   │       └── main.yml       # Install skopeo, htop, iproute2, jq, ncdu, pigz
+│   │       └── main.yml       # Install skopeo, htop, iproute2, jq, ncdu, pigz, nmap, vim
 │   ├── docker/
 │   │   ├── tasks/
 │   │   │   └── main.yml       # Install Docker from docker-ce repo

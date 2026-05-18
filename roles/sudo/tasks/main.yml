@@ -1,0 +1,9 @@
+---
+- name: Grant passwordless sudo to the ansible user
+  copy:
+    dest: "/etc/sudoers.d/90-{{ ansible_user }}-nopasswd"
+    content: "{{ ansible_user }} ALL=(ALL) NOPASSWD:ALL\n"
+    owner: root
+    group: root
+    mode: "0440"
+    validate: visudo -cf %s

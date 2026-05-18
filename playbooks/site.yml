@@ -6,6 +6,7 @@
     ansible_python_interpreter: /usr/bin/python3
 
   roles:
+    - sudo
     - tmux
     - bash-prompt
     - packages
@@ -16,4 +17,4 @@
   post_tasks:
     - name: Display success message
       debug:
-        msg: "Successfully configured {{ inventory_hostname }} with tmux, colored bash prompt, base packages, Docker, container tools, and k3s"
+        msg: "Successfully configured {{ inventory_hostname }} with passwordless sudo, tmux, colored bash prompt, base packages, Docker, container tools, and k3s"
